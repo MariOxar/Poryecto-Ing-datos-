@@ -1,0 +1,62 @@
+alter table datos add room_type_id int;
+update datos set room_type_id = 1 where room_type ='Entire home/apt';
+update datos set room_type_id = 2 where room_type ='Shared room';
+update datos set room_type_id = 3 where room_type ='Private room';
+
+
+CREATE TABLE Anfitrion (
+	host_id integer NOT NULL,
+	host_name varchar(50) NOT NULL,
+	CONSTRAINT anfitrion_pk PRIMARY KEY (host_id)
+);
+
+CREATE TABLE Tipo_vivienda(
+	room_type_id integer NOT NULL,
+	room_type varchar(20),
+	CONSTRAINT vivienda_pk PRIMARY KEY (room_type_id)
+);
+
+CREATE TABLE Hospedaje (
+	host_id integer NOT NULL,
+	id bigint NOT NULL,
+	name varchar(50) NOT NULL,
+	rooms decimal(25,2),
+	beds decimal(25,2),
+	baths decimal(25,2),
+	price decimal(25,2),
+	neighbourhood integer,
+	latitude decimal(40,2),
+	longitude decimal(40,2),
+	room_type_id integer,
+	CONSTRAINT hospedaje_pk PRIMARY KEY (id),
+	CONSTRAINT anfitrion_fk FOREIGN KEY (host_id) REFERENCES Anfitrion(host_id),
+	CONSTRAINT tipo_vivienda_fk FOREIGN KEY (room_type_id) REFERENCES Tipo_vivienda(room_type_id)
+);
+
+CREATE TABLE Airbnb (
+	id bigint NOT NULL,
+	avaliability_365 integer NOT NULL,
+	number_of_reviews_ltm integer,
+	reviews_per_month decimal(5,1),
+	last_review integer, -- Codigo de fecha, todas las fechas tienen un codigo distinto
+	stars decimal(25,2),
+	CONSTRAINT airbnb_pk PRIMARY KEY (id),
+	CONSTRAINT hospedaje_fk FOREIGN KEY (id) REFERENCES Hospedaje(id)
+);
+
+
+
+
+
+insert into Anfitrion (host_id, host_name) (select distinct host_id,host_name from datos);
+
+insert into Hospedaje(host_id,id,name,rooms,beds,baths,price,neighbourhood,latitude,longitude, room_type_id)
+(select host_id,id,name,rooms,beds,baths,price,neighbourhood,latitude,longitude, room_type_id from datos);
+
+insert into Airbnb (id, avaliability_365,number_of_reviews_ltm,reviews_per_month,last_review,stars) 
+(select id, avaliability_365,number_of_reviews_ltm,reviews_per_month,last_review,stars from datos);
+
+insert into Tipo_vivienda (room_type_id,room_type) (select distinct room_type_id,room_type from datos);
+
+
+

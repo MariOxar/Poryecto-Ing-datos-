@@ -1,0 +1,30 @@
+import pandas as pd
+import psycopg2 as psy2
+
+db = "Airbnb"
+user = "Pruebas"
+password = "123456"
+host = "Localhost"
+
+con = psy2.connect(dbname = db, user = user, password = password, host = host)
+
+def consultar(tabla):
+    if tabla == "Hospedaje":
+        return "select * from Hospedaje"
+    elif tabla == "Airbnb":
+        return "select * from Airbnb"
+    elif tabla == "Anfitrion":
+        return "select * from Anfitrion"
+    elif tabla == "Tipo_vivienda":
+        return "select * from tipo_vivienda"
+    else:
+        print("La tabla no existe")
+    
+table = str(input("¿Que tabla deseas consultar?\n"))
+
+impresion = pd.read_sql(consultar(table), con)
+
+print(impresion)
+
+
+con.close()
