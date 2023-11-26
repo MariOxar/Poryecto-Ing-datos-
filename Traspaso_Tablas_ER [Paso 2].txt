@@ -50,13 +50,14 @@ CREATE TABLE Airbnb (
 
 insert into Anfitrion (host_id, host_name) (select distinct host_id,host_name from datos);
 
+insert into Tipo_vivienda (room_type_id,room_type) (select distinct room_type_id,room_type from datos);
+
 insert into Hospedaje(host_id,id,name,rooms,beds,baths,price,neighbourhood,latitude,longitude, room_type_id)
 (select host_id,id,name,rooms,beds,baths,price,neighbourhood,latitude,longitude, room_type_id from datos);
 
 insert into Airbnb (id, avaliability_365,number_of_reviews_ltm,reviews_per_month,last_review,stars) 
 (select id, avaliability_365,number_of_reviews_ltm,reviews_per_month,last_review,stars from datos);
 
-insert into Tipo_vivienda (room_type_id,room_type) (select distinct room_type_id,room_type from datos);
 
 
 
