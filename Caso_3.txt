@@ -1,0 +1,87 @@
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
+import pandas as pd
+import plotly.graph_objs as go
+import dash_table
+import psycopg2 as psy2
+
+# Configuración de la conexión a la base de datos
+dbname = "Airbnb"
+user = "Pruebas"
+password = "123456"
+host = "localhost"
+
+# Establecer conexión a la base de datos
+conn = psy2.connect(dbname=dbname, user=user, password=password, host=host)
+
+# Consulta SQL para obtener datos relevantes
+sql_query = """
+SELECT
+    room_type_id,
+    AVG(reviews_per_month) AS promedio_reviews_per_month,
+    AVG(stars) AS promedio_stars
+FROM
+    tipo_vivienda
+    NATURAL JOIN hospedaje
+    NATURAL JOIN airbnb
+GROUP BY
+    room_type_id;
+"""
+
+df = pd.read_sql(sql_query, conn)
+
+# Cerrar la conexión a la base de datos
+conn.close()
+
+# Crear la aplicación Dash
+app = dash.Dash()
+
+# Layout de la aplicación
+app.layout = html.Div(style={'backgroundColor': '#FFFFFF', 'color': '#111111'}, children=[
+    html.H1('Promedio de Reviews por Mes y Estrellas por Tipo de Habitación', style={
+        'text-align': 'center',
+        'color': '#111111'
+    }),
+
+    html.Div([
+        dcc.Graph(
+            id='bar-chart-promedio-reviews',
+            figure=go.Figure(
+                data=[
+                    go.Bar(
+                        x=df['room_type_id'],
+                        y=df['promedio_reviews_per_month'],
+                        name='Promedio Reviews por Mes',
+                    ),
+                    go.Bar(
+                        x=df['room_type_id'],
+                        y=df['promedio_stars'],
+                        name='Promedio de Estrellas',
+                    ),
+                ],
+                layout=go.Layout(
+                    title='Promedio de Reviews por Mes y Estrellas por Tipo de Habitación',
+                    xaxis={'title': 'Tipo de Habitación'},
+                    yaxis={'title': 'Promedio'},
+                    barmode='group',  # Agrupa las barras
+                    template='plotly_dark',
+                )
+            )
+        ),
+        dash_table.DataTable(
+            id='table-promedio-reviews-estrellas',
+            columns=[
+                {'name': 'Tipo de Habitación', 'id': 'room_type_id'},
+                {'name': 'Promedio Reviews por Mes', 'id': 'promedio_reviews_per_month'},
+                {'name': 'Promedio de Estrellas', 'id': 'promedio_stars'},
+            ],
+            data=df.to_dict('records'),
+            style_table={'height': '200px', 'overflowY': 'auto'},
+        ),
+    ]),
+])
+
+# Ejecutar la aplicación
+if _name_ == '_main_':
+    app.run_server(host='0.0.0.0', port=8085)
